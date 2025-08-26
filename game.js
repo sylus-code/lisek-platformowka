@@ -7,7 +7,7 @@ const config = {
   height: 600,
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 300 }, debug: false }
+    arcade: { gravity: { y: 300 }, debug: true }
   },
   scene: {
     preload: preload,
@@ -21,6 +21,7 @@ let cursors;
 let score = 0;
 let scoreText;
 let obstacles;
+let scoredObstacles = [];
 
 const game = new Phaser.Game(config);
 
@@ -28,11 +29,12 @@ function preload () {
   this.load.image('background', 'assets/sky4.png');
   this.load.image('ground', 'assets/platform.png');
   this.load.image('obstacle', 'assets/spike.png');
-  this.load.spritesheet('fox', 'assets/fox_all.png', { frameWidth: 32, frameHeight: 32 });
+  this.load.spritesheet('fox', 'assets/fox_all.png', { frameWidth: 64, frameHeight: 64 });
 }
 
 function create () {
   this.add.image(400, 300, 'background');
+
   const platforms = this.physics.add.staticGroup();
   platforms.create(400, 584, 'ground').setScale(2).refreshBody();
 
@@ -42,20 +44,20 @@ function create () {
 
   this.anims.create({
     key: 'left',
-    frames: this.anims.generateFrameNumbers('fox', { start: 0, end: 1 }),
+    frames: this.anims.generateFrameNumbers('fox', { start: 0, end: 0 }),
     frameRate: 10,
     repeat: -1
   });
 
   this.anims.create({
     key: 'turn',
-    frames: [ { key: 'fox', frame: 0 } ],
+    frames: [ { key: 'fox', frame: 1 } ],
     frameRate: 20
   });
 
   this.anims.create({
     key: 'right',
-    frames: this.anims.generateFrameNumbers('fox', { start: 1, end: 2 }),
+    frames: this.anims.generateFrameNumbers('fox', { start: 2, end: 2 }),
     frameRate: 10,
     repeat: -1
   });
@@ -92,6 +94,20 @@ function update () {
   if (cursors.up.isDown && player.body.touching.down) {
     player.setVelocityY(-330);
   }
+
+  // Sprawdź, czy przeszkody zostały przeskoczone
+  obstacles.getChildren().forEach(obstacle => {
+    if (!scoredObstacles.includes(obstacle) && obstacle.x + obstacle.width < player.x) {
+      score += 10;
+      scoreText.setText('Score: ' + score);
+      scoredObstacles.push(obstacle);
+    }
+
+    // Usuń przeszkody poza ekranem
+    if (obstacle.x < -obstacle.width) {
+      obstacles.remove(obstacle, true, true);
+    }
+  });
 }
 
 function addObstacle() {
@@ -99,8 +115,6 @@ function addObstacle() {
   obstacle.setVelocityX(-200);
   obstacle.setCollideWorldBounds(false);
   obstacle.setImmovable(true);
-  score += 10;
-  scoreText.setText('Score: ' + score);
 }
 
 function hitObstacle(player, obstacle) {
