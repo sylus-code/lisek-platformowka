@@ -38,7 +38,7 @@ function create () {
   const platforms = this.physics.add.staticGroup();
   platforms.create(400, 584, 'ground').setScale(2).refreshBody();
 
-  player = this.physics.add.sprite(100, 450, 'fox');
+  player = this.physics.add.sprite(100, 450, 'fox',1);
   player.setBounce(0.2);
   player.setCollideWorldBounds(true);
 
