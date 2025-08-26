@@ -29,7 +29,7 @@ function preload () {
   this.load.image('background', 'assets/sky4.png');
   this.load.image('ground', 'assets/platform.png');
   this.load.image('obstacle', 'assets/spike.png');
-  this.load.spritesheet('fox', 'assets/fox_all.png', { frameWidth: 64, frameHeight: 64 });
+  this.load.spritesheet('fox', 'assets/fox_sprite.png', { frameWidth: 32, frameHeight: 32 });
 }
 
 function create () {
