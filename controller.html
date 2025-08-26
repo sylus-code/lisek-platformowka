@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sterowanie Liskiem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; }
+    button { font-size: 32px; margin: 10px; padding: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Steruj liskiem</h2>
+  <button onclick="send('left')">←</button>
+  <button onclick="send('jump')">↑</button>
+  <button onclick="send('right')">→</button>
+
+  <script>
+    const socket = io();
+    function send(command) {
+      socket.emit('control', command);
+    }
+  </script>
+</body>
+</html>
