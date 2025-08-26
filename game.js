@@ -6,7 +6,7 @@ const config = {
     default: 'arcade',
     arcade: {
       gravity: { y: 1000 },
-      debug: true
+      debug: false
     }
   },
   scene: {
@@ -30,10 +30,10 @@ let groundHeight = 50;
 let jumpAllowed = true;
 
 function preload() {
-  this.load.image('background', 'background.png');
-  this.load.image('ground', 'ground.png');
-  this.load.image('obstacle', 'obstacle.png');
-  this.load.spritesheet('fox', 'fox_sprite.png', {
+  this.load.image('background', 'assets/sky4.png');
+  this.load.image('ground', 'assets/platform.png');
+  this.load.image('obstacle', 'assets/spike.png');
+  this.load.spritesheet('fox', 'assets/fox_sprite.png', {
     frameWidth: 32,
     frameHeight: 32
   });
@@ -117,6 +117,7 @@ function addObstacle() {
   obstacle.body.allowGravity = false;
   obstacle.setVelocityX(obstacleSpeed);
   obstacle.setImmovable(true);
+  obstacle.setScale(0.4); // 🔧 zmniejszamy przeszkodę
   obstacle.passed = false;
 }
 
