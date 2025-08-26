@@ -1,13 +1,13 @@
-/**
- * @this {Phaser.Scene}
- */
 const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 300 }, debug: true }
+    arcade: {
+      gravity: { y: 1000 },
+      debug: true
+    }
   },
   scene: {
     preload: preload,
@@ -16,110 +16,114 @@ const config = {
   }
 };
 
-let player;
-let cursors;
-let score = 0;
-let scoreText;
-let obstacles;
-let scoredObstacles = [];
-
 const game = new Phaser.Game(config);
 
-function preload () {
-  this.load.image('background', 'assets/sky4.png');
-  this.load.image('ground', 'assets/platform.png');
-  this.load.image('obstacle', 'assets/spike.png');
-  this.load.spritesheet('fox', 'assets/fox_sprite.png', { frameWidth: 32, frameHeight: 32 });
+let player;
+let cursors;
+let ground;
+let obstacles;
+let score = 0;
+let scoreText;
+let gameOver = false;
+let obstacleSpeed = -200;
+let groundHeight = 50;
+let jumpAllowed = true;
+
+function preload() {
+  this.load.image('background', 'background.png');
+  this.load.image('ground', 'ground.png');
+  this.load.image('obstacle', 'obstacle.png');
+  this.load.spritesheet('fox', 'fox_sprite.png', {
+    frameWidth: 32,
+    frameHeight: 32
+  });
 }
 
-function create () {
+function create() {
   this.add.image(400, 300, 'background');
 
-  const platforms = this.physics.add.staticGroup();
-  platforms.create(400, 584, 'ground').setScale(2).refreshBody();
+  ground = this.add.tileSprite(400, 600 - groundHeight / 2, 800, groundHeight, 'ground');
+  this.physics.add.existing(ground, true);
 
-  player = this.physics.add.sprite(100, 450, 'fox',1);
-  player.setBounce(0.2);
+  player = this.physics.add.sprite(100, 600 - groundHeight - 32, 'fox');
+  player.setBounce(0);
   player.setCollideWorldBounds(true);
+  player.setScale(2);
+  player.setFlipX(true); // patrzy w prawo
 
   this.anims.create({
-    key: 'left',
-    frames: this.anims.generateFrameNumbers('fox', { start: 0, end: 0 }),
+    key: 'run',
+    frames: this.anims.generateFrameNumbers('fox', { start: 0, end: 2 }),
     frameRate: 10,
     repeat: -1
   });
 
-  this.anims.create({
-    key: 'turn',
-    frames: [ { key: 'fox', frame: 1 } ],
-    frameRate: 20
-  });
+  player.anims.play('run', true);
 
-  this.anims.create({
-    key: 'right',
-    frames: this.anims.generateFrameNumbers('fox', { start: 2, end: 2 }),
-    frameRate: 10,
-    repeat: -1
-  });
-
-  this.physics.add.collider(player, platforms);
   cursors = this.input.keyboard.createCursorKeys();
 
+  this.physics.add.collider(player, ground);
+
   obstacles = this.physics.add.group();
+  this.physics.add.collider(obstacles, ground);
+  this.physics.add.overlap(player, obstacles, hitObstacle, null, this);
+
+  scoreText = this.add.text(16, 16, 'Score: 0', {
+    fontSize: '32px',
+    fill: '#000',
+    fontFamily: 'monospace'
+  });
+
   this.time.addEvent({
     delay: 2000,
     callback: addObstacle,
     callbackScope: this,
     loop: true
   });
-
-  this.physics.add.collider(obstacles, platforms);
-  this.physics.add.overlap(player, obstacles, hitObstacle, null, this);
-
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 }
 
-function update () {
-  if (cursors.left.isDown) {
-    player.setVelocityX(-160);
-    player.anims.play('left', true);
-  } else if (cursors.right.isDown) {
-    player.setVelocityX(160);
-    player.anims.play('right', true);
-  } else {
-    player.setVelocityX(0);
-    player.anims.play('turn');
+function update() {
+  if (gameOver) return;
+
+  if (cursors.up.isDown && player.body.touching.down && jumpAllowed) {
+    player.setVelocityY(-500);
+    jumpAllowed = false;
   }
 
-  if (cursors.up.isDown && player.body.touching.down) {
-    player.setVelocityY(-330);
+  if (player.body.touching.down) {
+    jumpAllowed = true;
   }
 
-  // Sprawdź, czy przeszkody zostały przeskoczone
-  obstacles.getChildren().forEach(obstacle => {
-    if (!scoredObstacles.includes(obstacle) && obstacle.x + obstacle.width < player.x) {
-      score += 10;
-      scoreText.setText('Score: ' + score);
-      scoredObstacles.push(obstacle);
+  obstacles.getChildren().forEach(function (obstacle) {
+    obstacle.setVelocityX(obstacleSpeed);
+
+    // Usuwanie przeszkód poza ekranem
+    if (obstacle.x + obstacle.width < 0) {
+      obstacles.remove(obstacle, true, true);
     }
 
-    // Usuń przeszkody poza ekranem
-    if (obstacle.x < -obstacle.width) {
-      obstacles.remove(obstacle, true, true);
+    // Przyznaj punkt za przeskoczoną przeszkodę
+    if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
+      obstacle.passed = true;
+      score++;
+      scoreText.setText('Score: ' + score);
     }
   });
 }
 
 function addObstacle() {
-  const obstacle = obstacles.create(800, 550, 'obstacle');
-  obstacle.setVelocityX(-200);
+  const obstacle = obstacles.create(800, 600 - groundHeight - 32, 'obstacle');
   obstacle.setCollideWorldBounds(false);
+  obstacle.body.allowGravity = false;
+  obstacle.setVelocityX(obstacleSpeed);
   obstacle.setImmovable(true);
+  obstacle.passed = false;
 }
 
 function hitObstacle(player, obstacle) {
   this.physics.pause();
   player.setTint(0xff0000);
-  player.anims.play('turn');
+  player.anims.stop();
+  gameOver = true;
   scoreText.setText('Game Over! Score: ' + score);
 }
