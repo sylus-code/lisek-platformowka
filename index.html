@@ -12,8 +12,8 @@
       position:fixed;
       left:0; right:0;
       bottom: max(16px, env(safe-area-inset-bottom));
-      display:none;               /* desktop domyślnie ukryty */
-      z-index:9999;               /* ponad canvasem */
+      display:none;                 /* desktop ukryty */
+      z-index:9999;                 /* nad canvasem */
       justify-content:center;
       pointer-events:auto;
     }
@@ -26,6 +26,7 @@
       color:#fff;
       box-shadow:0 4px 12px rgba(0,0,0,0.3);
     }
+    /* zostawiamy media-query, ale dołożymy JS fallback */
     @media (hover:none) and (pointer:coarse){
       .mobile-controls{ display:flex; }
     }

@@ -54,10 +54,10 @@ function create() {
   player.setScale(2);
   player.setFlipX(true); // „w prawo”
 
-  // --- lisek „stopami” do ziemi (wizualnie) ---
-  player.setOrigin(0.5, 1);
-  const FOOT_ADJUST = 4; // drobna kosmetyka, jeśli sprite ma przezroczyste piksele u dołu
-  player.y = 600 - groundHeight + FOOT_ADJUST;
+  // --- lisek „stopami” do ziemi ---
+  // rozmiar klatki to 32x32, skala 2x; collider ustawiamy „na buty”
+  player.body.setSize(32, 28, true); // trochę niższy (28) = łatwiej o czyste lądowanie
+  player.body.setOffset(0, 0);       // 4 px „podeszwy” (w jednostkach klatki, nie skali)
 
   this.anims.create({
     key: 'run',
@@ -96,10 +96,20 @@ function create() {
   if (btnUp) {
     const down = e => { e.preventDefault(); wantJump = true; };
     const up   = e => { e.preventDefault(); /* impuls jednorazowy */ };
+
     btnUp.addEventListener('touchstart', down, { passive: false });
     btnUp.addEventListener('touchend',   up,   { passive: false });
     btnUp.addEventListener('mousedown',  down);
     btnUp.addEventListener('mouseup',    up);
+  }
+
+  // pokaż sterowanie, jeśli urządzenie ma ekran dotykowy (fallback na wypadek, gdy media-query nie zadziała)
+  const controlsEl = document.querySelector('.mobile-controls');
+  if (controlsEl) {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+        || ('ontouchstart' in window)
+        || (navigator.maxTouchPoints > 0);
+    if (isTouch) controlsEl.style.display = 'flex';
   }
 }
 
