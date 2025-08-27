@@ -1,6 +1,6 @@
 const config = {
   type: Phaser.AUTO,
-  width: 800,
+  width: 450,
   height: 600,
   physics: {
     default: 'arcade',
@@ -36,7 +36,7 @@ let highScore = parseInt(localStorage.getItem('highScore') || '0', 10);
 let highScoreText;
 
 function preload() {
-  this.load.image('title', 'assets/title-landscape.png');
+  this.load.image('title', 'assets/title-lisek.png');
   this.load.image('background', 'assets/sky4.png');
   this.load.image('ground', 'assets/platform.png');
   this.load.image('obstacle', 'assets/spike.png');
@@ -91,15 +91,15 @@ function create() {
     fontFamily: 'monospace'
   });
 
-  highScoreText = this.add.text(800 - 16, 16, 'Best: ' + highScore, {
+  highScoreText = this.add.text(450 - 16, 16, 'Best: ' + highScore, {
     fontSize: '24px', fill: '#000', fontFamily: 'monospace'
   }).setOrigin(1, 0);
 
 //  EKRAN STARTOWY + pauza
-  startImage = this.add.image(400, 300, 'title').setOrigin(0.5).setDepth(999);
-  startImage.setScale(0.8); // dopasuj do okna gry
-  startText = this.add.text(400, 300,
-      'Lisek Jump\n\nTapnij ekran lub naciśnij SPACJĘ\naby rozpocząć',
+  startImage = this.add.image(230, 300, 'title').setOrigin(0.5).setDepth(999);
+  startImage.setScale(0.6); // dopasuj do okna gry
+  startText = this.add.text(200, 300,
+      'Lisek Jump\n\nTapnij ekran\nlub naciśnij SPACJĘ\naby rozpocząć',
       { fontSize: '28px', fill: '#555', fontFamily: 'monospace', align: 'center' }
   ).setOrigin(0.5).setDepth(999);
 
@@ -219,7 +219,7 @@ function hitObstacle(player, obstacle) {
   }
   highScoreText.setText('Best: ' + highScore);
 
-  scoreText.setText('Game Over! Score: ' + score + '\nTapnij lub naciśnij R, aby zagrać ponownie');
+  scoreText.setText('Game Over!\n Score: ' + score + '\nTapnij lub naciśnij R,\n aby zagrać ponownie');
 
   this.input.once('pointerdown', () => this.scene.restart());
   this.input.keyboard?.once('keydown-R', () => this.scene.restart());
