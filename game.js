@@ -29,7 +29,14 @@ let jumpCount = 0;          // 0, 1, 2 (drugi skok = „double jump”)
 let wantJump = false;       // impuls z przycisku mobilnego
 let jumpCooldown = false;   // krótki cooldown, by nie zjadało wielu skoków naraz
 
+// --- ekran startowy i high score ---
+let gameStarted = false;
+let startText;
+let highScore = parseInt(localStorage.getItem('highScore') || '0', 10);
+let highScoreText;
+
 function preload() {
+  this.load.image('title', 'assets/title-landscape.png');
   this.load.image('background', 'assets/sky4.png');
   this.load.image('ground', 'assets/platform.png');
   this.load.image('obstacle', 'assets/spike.png');
@@ -84,13 +91,23 @@ function create() {
     fontFamily: 'monospace'
   });
 
-  this.time.addEvent({
-    delay: 2000,
-    callback: addObstacle,
-    callbackScope: this,
-    loop: true
-  });
+  highScoreText = this.add.text(800 - 16, 16, 'Best: ' + highScore, {
+    fontSize: '24px', fill: '#000', fontFamily: 'monospace'
+  }).setOrigin(1, 0);
 
+//  EKRAN STARTOWY + pauza
+  startImage = this.add.image(400, 300, 'title').setOrigin(0.5).setDepth(999);
+  startImage.setScale(0.8); // dopasuj do okna gry
+  startText = this.add.text(400, 300,
+      'Lisek Jump\n\nTapnij ekran lub naciśnij SPACJĘ\naby rozpocząć',
+      { fontSize: '28px', fill: '#555', fontFamily: 'monospace', align: 'center' }
+  ).setOrigin(0.5).setDepth(999);
+
+  this.physics.pause(); // gra stoi do startu
+
+// nasłuch startu
+  this.input.once('pointerdown', () => startGame.call(this));
+  this.input.keyboard?.once('keydown-SPACE', () => startGame.call(this));
   // --- mobilny przycisk „Skok” ---
   const btnUp = document.getElementById('btn-up');
   if (btnUp) {
@@ -112,9 +129,26 @@ function create() {
     if (isTouch) controlsEl.style.display = 'flex';
   }
 }
+function startGame() {
+  if (gameStarted || gameOver) return;
+  gameStarted = true;
+
+  startText?.destroy();
+  startImage?.destroy();
+  this.physics.resume();
+
+  // startuj przeszkody dopiero teraz
+  this.time.addEvent({
+    delay: 2000,
+    callback: addObstacle,
+    callbackScope: this,
+    loop: true
+  });
+}
 
 function update() {
   if (gameOver) return;
+  if (!gameStarted) return; // dopóki nie klikniesz START, nic nie robi
 
   // tylko skok (bez lewo/prawo)
   const pressedUp = (cursors.up && cursors.up.isDown) || wantJump;
@@ -177,6 +211,14 @@ function hitObstacle(player, obstacle) {
   player.setTint(0xff0000);
   player.anims.stop();
   gameOver = true;
+
+  // high score
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('highScore', String(highScore));
+  }
+  highScoreText.setText('Best: ' + highScore);
+
   scoreText.setText('Game Over! Score: ' + score + '\nTapnij lub naciśnij R, aby zagrać ponownie');
 
   this.input.once('pointerdown', () => this.scene.restart());
