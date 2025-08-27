@@ -36,7 +36,7 @@ let highScore = parseInt(localStorage.getItem('highScore') || '0', 10);
 let highScoreText;
 
 function preload() {
-  this.load.image('title', 'assets/title-lisek.png');
+  this.load.image('title', 'assets/title-landscape.png');
   this.load.image('background', 'assets/sky4.png');
   this.load.image('ground', 'assets/platform.png');
   this.load.image('obstacle', 'assets/spike.png');
@@ -95,18 +95,12 @@ function create() {
     fontSize: '24px', fill: '#000', fontFamily: 'monospace'
   }).setOrigin(1, 0);
 
-  //
-  // this.time.addEvent({
-  //   delay: 2000,
-  //   callback: addObstacle,
-  //   callbackScope: this,
-  //   loop: true
-  // });
-
 //  EKRAN STARTOWY + pauza
+  startImage = this.add.image(400, 300, 'title').setOrigin(0.5).setDepth(999);
+  startImage.setScale(0.8); // dopasuj do okna gry
   startText = this.add.text(400, 300,
       'Lisek Jump\n\nTapnij ekran lub naciśnij SPACJĘ\naby rozpocząć',
-      { fontSize: '28px', fill: '#000', fontFamily: 'monospace', align: 'center' }
+      { fontSize: '28px', fill: '#555', fontFamily: 'monospace', align: 'center' }
   ).setOrigin(0.5).setDepth(999);
 
   this.physics.pause(); // gra stoi do startu
@@ -140,6 +134,7 @@ function startGame() {
   gameStarted = true;
 
   startText?.destroy();
+  startImage?.destroy();
   this.physics.resume();
 
   // startuj przeszkody dopiero teraz
