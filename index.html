@@ -3,10 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <title>Lisek Platformówka</title>
-  <style>body { margin: 0; }</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { margin: 0; }
+
+    /* Mobilny przycisk skoku (tylko na dotyku) */
+    .mobile-controls{
+      position:fixed;
+      left:0; right:0;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      display:none;               /* desktop domyślnie ukryty */
+      z-index:9999;               /* ponad canvasem */
+      justify-content:center;
+      pointer-events:auto;
+    }
+    .mobile-controls button{
+      font-size:20px;
+      padding:14px 28px;
+      border:none;
+      border-radius:14px;
+      background: rgba(0,0,0,0.65);
+      color:#fff;
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    }
+    @media (hover:none) and (pointer:coarse){
+      .mobile-controls{ display:flex; }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
-  <script src="game.js"></script>
+  <script defer src="game.js"></script>
 </head>
 <body>
+<!-- przycisk skoku tylko na mobile -->
+<div class="mobile-controls">
+  <button id="btn-up">Skok</button>
+</div>
 </body>
 </html>
