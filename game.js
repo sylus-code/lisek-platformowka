@@ -48,7 +48,9 @@ function preload() {
 
 function create() {
   score = 0;
+  gameStarted = false; // ważne po scene.restart()
   gameOver = false;
+
 
   this.add.image(400, 300, 'background');
 
